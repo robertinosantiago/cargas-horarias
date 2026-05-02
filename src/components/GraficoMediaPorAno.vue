@@ -6,43 +6,55 @@ const props = defineProps({
 })
 
 /**
- * 📊 calcular média por docente por ano
+ * 📊 Média por ano (média das médias dos períodos)
  */
 const dados = computed(() => {
-  const mapaDocente = {}
-  const periodosPorAno = {}
-
-  props.turmas.forEach(t => {
-    // controle de períodos
-    if (!periodosPorAno[t.ano]) {
-      periodosPorAno[t.ano] = new Set()
-    }
-    periodosPorAno[t.ano].add(t.periodo)
-
-    // carga por docente
-    if (!mapaDocente[t.ano]) {
-      mapaDocente[t.ano] = {}
-    }
-
-    if (!mapaDocente[t.ano][t.docente]) {
-      mapaDocente[t.ano][t.docente] = 0
-    }
-
-    mapaDocente[t.ano][t.docente] += t.carga_horaria_semanal
-  })
-
   const resultado = {}
 
-  Object.keys(mapaDocente).forEach(ano => {
-    const cargas = Object.values(mapaDocente[ano])
-    const soma = cargas.reduce((a, b) => a + b, 0)
+  // obter anos únicos
+  const anos = [...new Set(props.turmas.map(t => t.ano))]
 
-    const mediaDocentes = soma / cargas.length
+  anos.forEach(ano => {
+    // obter períodos únicos do ano
+    const periodos = [
+      ...new Set(
+        props.turmas
+          .filter(t => t.ano === ano)
+          .map(t => t.periodo)
+      )
+    ]
 
-    const qtdPeriodos = periodosPorAno[ano].size || 1
+    const mediasPorPeriodo = periodos.map(periodo => {
+      const turmasPeriodo = props.turmas.filter(
+        t => t.ano === ano && t.periodo === periodo
+      )
 
-    // 🔥 ajuste solicitado
-    resultado[ano] = mediaDocentes / qtdPeriodos
+      // agrupar por docente
+      const mapaDocente = {}
+
+      turmasPeriodo.forEach(t => {
+        if (!mapaDocente[t.docente]) {
+          mapaDocente[t.docente] = 0
+        }
+        mapaDocente[t.docente] += t.carga_horaria_semanal
+      })
+
+      const cargas = Object.values(mapaDocente)
+
+      if (cargas.length === 0) return 0
+
+      const soma = cargas.reduce((a, b) => a + b, 0)
+
+      return soma / cargas.length
+    })
+
+    // média dos períodos
+    if (mediasPorPeriodo.length > 0) {
+      const somaMedias = mediasPorPeriodo.reduce((a, b) => a + b, 0)
+      resultado[ano] = somaMedias / mediasPorPeriodo.length
+    } else {
+      resultado[ano] = 0
+    }
   })
 
   return resultado
@@ -61,7 +73,7 @@ const chartOptions = computed(() => ({
   },
   yaxis: {
     labels: {
-      formatter: val => Math.round(val) // 👈 sem decimal
+      formatter: val => Math.round(val) // sem casas decimais no eixo
     }
   },
   dataLabels: {
@@ -71,6 +83,32 @@ const chartOptions = computed(() => ({
     style: {
       colors: ['#000']
     }
+  },
+  annotations: {
+    yaxis: [
+      {
+        y: 8,
+        borderColor: '#008000',
+        label: {
+          text: 'Meta 8h',
+          style: {
+            color: '#fff',
+            background: '#008000'
+          }
+        }
+      },
+      {
+        y: 12,
+        borderColor: '#FF0000',
+        label: {
+          text: 'Meta 12h',
+          style: {
+            color: '#fff',
+            background: '#FF0000'
+          }
+        }
+      }
+    ]
   }
 }))
 
