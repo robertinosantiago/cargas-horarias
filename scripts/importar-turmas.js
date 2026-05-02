@@ -72,6 +72,8 @@ const normalizarPeriodo = (p) => {
 
   if (p.includes("Especial 2")) return "2 Semestre";
 
+  if (p.includes("Estágio")) return "1 Semestre";
+
   return p.replace(/°/g, "");
 }
 

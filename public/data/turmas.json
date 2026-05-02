@@ -39210,7 +39210,7 @@
       "codigo": "JCE043",
       "nome": "CEF",
       "disciplina": "ESTÁGIO SUPERVISIONADO DE DOCÊNCIA EM FÍSICA II",
-      "periodo": "Período Especial Estágio",
+      "periodo": "1 Semestre",
       "ano": 2021,
       "turno": "Vespertino",
       "docente": "HERCILIA ALVES PEREIRA DE CARVALHO",
@@ -59228,8 +59228,7 @@
     ],
     "periodos": [
       "2 Semestre",
-      "1 Semestre",
-      "Período Especial Estágio"
+      "1 Semestre"
     ],
     "turnos": [
       "Integral",
